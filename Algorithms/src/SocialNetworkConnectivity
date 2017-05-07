@@ -1,0 +1,92 @@
+/*
+First, we have to implement the union-find data structure.
+In order to maintain the logarithmic time complexity for the union operation we have to implement the weighted quick 
+union data structure. (Path compression is optional). The code for the data structure can be as follows: 
+*/
+//-----------------------------------------------------
+public class WeightedQuickUnionUF {
+    private int[] parent;  
+    private int[] size;    
+    private int componentCount;    
+   
+    public WeightedQuickUnionUF(int n) {
+        componentCount = n;
+        parent = new int[n];
+        size = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            size[i] = 1;
+        }
+    }
+
+    public int getComponentCount() {
+        return componentCount;
+    }
+     
+    public int findRoot(int p) {
+        int root = p;
+        while (root != parent[root])
+            root = parent[root];
+        return root;
+    }
+   
+    public boolean isConnected(int p, int q) {
+        return findRoot(p) == findRoot(q);
+    }
+
+    public void union(int p, int q) {
+        int rootP = findRoot(p);
+        int rootQ = findRoot(q);
+        if (rootP == rootQ) return;
+
+        if (size[rootP] < size[rootQ]) {
+            parent[rootP] = rootQ;
+            size[rootQ] += size[rootP];
+        }else {
+            parent[rootQ] = rootP;
+            size[rootP] += size[rootQ];
+        }
+        componentCount--;
+    }
+}
+//-----------------------------------------------------
+/*
+From here, we can assume that the provided log file could be as follows:
+
+1 0 20/05/2014 18:01:00
+4 2 20/05/2014 18:02:00
+3 7 20/05/2014 18:04:00
+6 5 20/05/2014 18:06:00
+9 8 20/05/2014 18:08:00
+1 9 20/05/2014 18:12:00
+5 2 20/05/2014 18:18:00
+
+showing the id of the members who became friends and the respective timestamp of this occurrence. 
+So, we have to come up with a client code making use of this log file and the data structure, 
+which will union the members as it reads their ids thorough the file and after each union it will check whether 
+the number of connected components has reached down to 1. When it does, we should return the respective timestamp. 
+If we are done reading lines from the file and we have not reached to one connected component, 
+then we can return an appropriate message for this. Java code implementing this can be as follows:
+*/
+public String earliestTime(int n, String logFileName){
+
+        WeightedQuickUnionUF uf = new WeightedQuickUnionUF(n);
+        BufferedReader br = new BufferedReader(new FileReader(logFileName));
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] lineInfo = line.split(" ");
+                int p = Integer.parseInt(lineInfo[0]);
+                int q = Integer.parseInt(lineInfo[1]);
+                String timeStamp = lineInfo[2] + " " + lineInfo[3];
+                uf.union(p, q);
+                
+                if (uf.getComponentCount() == 1) {
+                    return "Earilest time : " + timeStamp;
+                }
+            }
+
+        } catch (IOException e) {
+        }
+        return "All members are not connected at any timestamp";
+}  

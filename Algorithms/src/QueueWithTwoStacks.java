@@ -37,7 +37,7 @@ public class QueueWithTwoStacks {
     
     public int peek(){
         moveFromFirstToSecond();
-        int value = second.pop();
+        int value = second.peek();
         moveFromSecondToFirst();
         return value;
     }

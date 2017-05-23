@@ -1,0 +1,84 @@
+/*
+In order to utilize the union-find data structure to solve this problem,  we should consider the non-deleted items 
+as the root points in the trees and the deleted items as the child nodes. So whenever an item x is to be removed 
+it should be unioned with x+1, so this will make x+1 root and x child node. And whenever the successor is requested for x, 
+we should return the root of x, which is x+1. Initially when no node is deleted, every node will be root and the successor 
+will the number itself. For instance, if 4 is removed and 3 is removed consecutively and the successor of 3 is requested, 
+the root of 3 will be 5 and this will be returned.
+
+On the other hand, we should avoid implementing weighted union by size. because for instance, 
+if we consider after removing 4 and 3, if 5 is removed next then the tree with node 5 will be unioned to single node 
+with value 6. Since size of one node is smaller, 5 will be kept as root and the node with value 6 will be child node. 
+So we should not implement weighted quick union but for time performance we should implement path compression.
+
+So the union-find and Successor with Delete implementations should look like as follows:
+*/
+public class QuickUnionWithPathCompressionUF {
+
+        private final int[] parent;
+        private final int[] size;
+        private int componentCount;
+
+        public QuickUnionWithPathCompressionUF(int n) {
+            componentCount = n;
+            parent = new int[n];
+            size = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+        }
+
+        public int getComponentCount() {
+            return componentCount;
+        }
+
+        public int findRoot(int p) {
+            int root = p;
+            while (root != parent[root]) {
+                parent[root] = parent[parent[root]]; //Path Compression
+                root = parent[root];
+            }
+            return root;
+        }
+
+        public boolean isConnected(int p, int q) {
+            return findRoot(p) == findRoot(q);
+        }
+
+        public void union(int p, int q) {
+            int rootP = findRoot(p);
+            int rootQ = findRoot(q);
+            if (rootP == rootQ) {
+                return;
+            }
+            parent[rootP]  = rootQ;
+            componentCount--;
+        }
+    }
+
+public class SuccessorWithDelete{
+        private final QuickUnionWithPathCompressionUF uf;
+        private final boolean[] removeInfo; 
+
+        public SuccessorWithDelete(int n ) {
+            uf = new QuickUnionWithPathCompressionUF(n);
+            removeInfo = new boolean[n];
+            for(int i = 0; i < removeInfo.length; i++){
+                removeInfo[i] = true;
+            }
+        }
+        
+        public void remove(int x){
+            removeInfo[x] = false;
+            uf.union(x, x + 1);
+        }
+        
+        public int getSuccessor(int x){
+            if(removeInfo[x]){
+                return x;
+            }else{
+                return uf.findRoot(x);
+            }
+        }
+    }

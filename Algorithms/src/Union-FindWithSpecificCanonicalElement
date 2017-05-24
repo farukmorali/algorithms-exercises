@@ -1,0 +1,71 @@
+/*
+To achieve this goal, we have to make little additions to our WeightedQuickUnionUF data structure implementation. 
+We should maintain another integer array which will be used to map the maximum value of each root in the data structure. 
+Initially the maximum value of each site will have the value of itself since every node is the root of itself. 
+As we perform union operations, we need to update the maximum value of the root, to whose tree the new tree is added. 
+So the new API should look like as follows:
+*/
+
+public static class WeightedQuickUnionUF {
+
+        private final int[] parent;
+        private final int[] size;
+        private int componentCount;
+        //Below code is added
+        private final int[] maximums;
+
+        public WeightedQuickUnionUF(int n) {
+            maximums = new int[n];
+            componentCount = n;
+            parent = new int[n];
+            size = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+                //Below code is added
+                maximums[i] = i;
+            }
+        }
+
+        public int getComponentCount() {
+            return componentCount;
+        }
+
+        public int findRoot(int p) {
+            int root = p;
+            while (root != parent[root]) {
+                root = parent[root];
+            }
+            return root;
+        }
+
+        public boolean isConnected(int p, int q) {
+            return findRoot(p) == findRoot(q);
+        }
+
+        public void union(int p, int q) {
+            int rootP = findRoot(p);
+            int rootQ = findRoot(q);
+            if (rootP == rootQ) {
+                return;
+            }
+
+            if (size[rootP] < size[rootQ]) {
+                parent[rootP] = rootQ;
+                size[rootQ] += size[rootP];
+                //Below code is added
+                maximums[rootQ] = Math.max(maximums[rootQ], maximums[rootP]);
+            } else {
+                parent[rootQ] = rootP;
+                size[rootP] += size[rootQ];
+               //Below code is added
+                maximums[rootP] = Math.max(maximums[rootQ], maximums[rootP]);
+            }
+            componentCount--;
+        }
+        
+        //Below code is added
+        public int getMax(int p){
+            return maximums[findRoot(p)];
+        }
+    }

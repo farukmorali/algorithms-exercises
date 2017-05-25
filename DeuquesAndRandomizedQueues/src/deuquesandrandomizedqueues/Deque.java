@@ -6,6 +6,7 @@
 package deuquesandrandomizedqueues;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -38,8 +39,11 @@ public class Deque<Item> implements Iterable<Item> {
         Node newFirst = new Node();
         newFirst.item = item;
         newFirst.next = first;
+
         if (isEmpty()) {
             last = newFirst;
+        } else {
+            first.prev = newFirst;
         }
         first = newFirst;
         size++;
@@ -53,6 +57,7 @@ public class Deque<Item> implements Iterable<Item> {
         last = new Node();
         last.item = item;
         last.next = null;
+        last.prev = oldlast;
         if (isEmpty()) {
             first = last;
         } else {
@@ -69,6 +74,8 @@ public class Deque<Item> implements Iterable<Item> {
         first = first.next;
         if (isEmpty()) {
             last = null;
+        } else {
+            first.prev = null;
         }
         size--;
         return item;
@@ -81,25 +88,54 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         Item item = (Item) last.item;
-        Node tmp = first;
-
-        while (tmp.next != null && tmp.next != last) {
-            tmp = tmp.next;
-        }
-        last = tmp;
-        if (first == tmp) {
-            last = null;
-        } else {
+        if (size > 1) {
+            last = last.prev;
             last.next = null;
+        } else {
+            first = null;
+            last = null;
         }
-        size--;
 
+        size--;
         return item;
     }
 
     @Override
     public Iterator<Item> iterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new ListIterator();
+    }
+
+    private class ListIterator implements Iterator<Item> {
+
+        private Node current = first;
+
+        @Override
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Item next() {
+            if (current == null) {
+                throw new NoSuchElementException();
+            }
+            Item item = (Item) current.item;
+            current = current.next;
+            return item;
+        }
+
+    }
+
+    private class Node<Item> {
+
+        Item item;
+        Node next;
+        Node prev;
     }
 
     public static void main(String[] args) {

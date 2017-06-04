@@ -1,0 +1,31 @@
+/*
+Suppose that the subarray 𝚊[𝟶] to 𝚊[𝚗−𝟷] is sorted and the subarray 𝚊[𝚗] to 𝚊[𝟸∗𝚗−𝟷] is sorted. 
+How can you merge the two subarrays so that 𝚊[𝟶] to 𝚊[𝟸∗𝚗−𝟷] is sorted using an auxiliary array of length n (instead of 2n)?
+*/
+
+//auxiliary array is half of length than the original array
+public static void halfAuxMerge(Comparable[] a, Comparable[] aux, int lo, int mid, int hi){
+
+	for(int k = 0; k < mid/2; k++){
+		aux[k] = a[k];
+	}
+	
+	for(int k = mid + 1; k < 3 * mid/2; k++){
+		aux[k] = a[k];
+	}
+	
+	for(int k = (mid/2) + 1; k < mid + 1; k++){
+		a[k] = a[k + ((mid + 1)/2)];
+	}
+
+	int i = lo, j = mid / 2 + 1;
+	for(int k = lo; k < mid + 1; k ++){
+		if (i > mid /2) a[k] = aux[j++];
+		else if (j > mid + 1) a[k] = aux[i++];
+		else if (less(aux[j], aux[i])) a[k] = aux[j++];
+		else a[k] = aux[i++];
+	}
+
+	for(int k = (mid) + 1; k <= hi; k++){
+		aux[k - mid -1] = a[k];
+	}
